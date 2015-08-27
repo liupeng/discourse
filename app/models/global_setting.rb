@@ -23,7 +23,10 @@ class GlobalSetting
         hash[s] = val
       end
     end
-    hash["host_names"] = [ hostname ]
+    hostnames = [ hostname ]
+    hostnames << backup_hostname if backup_hostname.present?
+
+    hash["host_names"] = hostnames
     hash["database"] = db_name
 
     hash["prepared_statements"] = !!self.db_prepared_statements
@@ -85,7 +88,7 @@ class GlobalSetting
 
     def read
       ERB.new(File.read(@file)).result().split("\n").each do |line|
-        if line =~ /^\s*([a-z_]+)\s*=\s*(\"([^\"]*)\"|\'([^\']*)\'|[^#]*)/
+        if line =~ /^\s*([a-z_]+[a-z0-9_]*)\s*=\s*(\"([^\"]*)\"|\'([^\']*)\'|[^#]*)/
           @data[$1.strip.to_sym] = ($4 || $3 || $2).strip
         end
       end

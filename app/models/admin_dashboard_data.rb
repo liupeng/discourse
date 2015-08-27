@@ -1,6 +1,7 @@
 require_dependency 'mem_info'
 
 class AdminDashboardData
+  include StatsCacheable
 
   GLOBAL_REPORTS ||= [
     'visits',
@@ -36,7 +37,7 @@ class AdminDashboardData
       ruby_version_check,
       host_names_check,
       gc_checks,
-      sidekiq_check,
+      sidekiq_check || queue_size_check,
       ram_check,
       google_oauth2_config_check,
       facebook_config_check,
@@ -57,13 +58,7 @@ class AdminDashboardData
 
 
   def self.fetch_stats
-    AdminDashboardData.new
-  end
-
-  def self.fetch_cached_stats
-    # The DashboardStats job is responsible for generating and caching this.
-    stats = $redis.get(stats_cache_key)
-    stats ? JSON.parse(stats) : nil
+    AdminDashboardData.new.as_json
   end
 
   def self.stats_cache_key
@@ -97,11 +92,6 @@ class AdminDashboardData
     source.map { |type| Report.find(type).as_json }
   end
 
-  # Could be configurable, multisite need to support it.
-  def self.recalculate_interval
-    30 # minutes
-  end
-
   def rails_env_check
     I18n.t("dashboard.rails_env_warning", env: Rails.env) unless Rails.env.production?
   end
@@ -117,6 +107,11 @@ class AdminDashboardData
   def sidekiq_check
     last_job_performed_at = Jobs.last_job_performed_at
     I18n.t('dashboard.sidekiq_warning') if Jobs.queued > 0 and (last_job_performed_at.nil? or last_job_performed_at < 2.minutes.ago)
+  end
+
+  def queue_size_check
+    queue_size = Jobs.queued
+    I18n.t('dashboard.queue_size_warning', queue_size: queue_size) unless queue_size < 100_000
   end
 
   def ram_check

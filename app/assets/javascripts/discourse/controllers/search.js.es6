@@ -1,19 +1,27 @@
-import Presence from 'discourse/mixins/presence';
 import searchForTerm from 'discourse/lib/search-for-term';
+import DiscourseURL from 'discourse/lib/url';
+import computed from 'ember-addons/ember-computed-decorators';
 
-var _dontSearch = false;
+let _dontSearch = false;
 
-export default Em.Controller.extend(Presence, {
+export default Em.Controller.extend({
+  typeFilter: null,
 
-  contextType: function(key, value){
-    if(arguments.length > 1) {
+  @computed('searchContext')
+  contextType: {
+    get(searchContext) {
+      if (searchContext) {
+        return Ember.get(searchContext, 'type');
+      }
+    },
+    set(value, searchContext) {
       // a bit hacky, consider cleaning this up, need to work through all observers though
-      var context = $.extend({}, this.get('searchContext'));
+      const context = $.extend({}, searchContext);
       context.type = value;
       this.set('searchContext', context);
+      return this.get('searchContext.type');
     }
-    return this.get('searchContext.type');
-  }.property('searchContext'),
+  },
 
   contextChanged: function(){
     if (this.get('searchContextEnabled')) {
@@ -23,8 +31,38 @@ export default Em.Controller.extend(Presence, {
     }
   }.observes('searchContext'),
 
+  fullSearchUrlRelative: function(){
+
+    if (this.get('searchContextEnabled') && this.get('searchContext.type') === 'topic') {
+      return null;
+    }
+
+    let url = '/search?q=' + encodeURIComponent(this.get('term'));
+    const searchContext = this.get('searchContext');
+
+    if (this.get('searchContextEnabled')) {
+      if (searchContext.id.toString().toLowerCase() === this.get('currentUser.username_lower') &&
+          searchContext.type === "private_messages"
+          ) {
+        url += ' in:private';
+      } else {
+        url += encodeURIComponent(" " + searchContext.type + ":" + searchContext.id);
+      }
+    }
+
+    return url;
+
+  }.property('searchContext','term','searchContextEnabled'),
+
+  fullSearchUrl: function(){
+    const url = this.get('fullSearchUrlRelative');
+    if (url) {
+      return Discourse.getURL(url);
+    }
+  }.property('fullSearchUrlRelative'),
+
   searchContextDescription: function(){
-    var ctx = this.get('searchContext');
+    const ctx = this.get('searchContext');
     if (ctx) {
       switch(Em.get(ctx, 'type')) {
         case 'topic':
@@ -47,7 +85,7 @@ export default Em.Controller.extend(Presence, {
   // If we need to perform another search
   newSearchNeeded: function() {
     this.set('noResults', false);
-    var term = (this.get('term') || '').trim();
+    const term = (this.get('term') || '').trim();
     if (term.length >= Discourse.SiteSettings.min_search_term_length) {
       this.set('loading', true);
 
@@ -58,28 +96,38 @@ export default Em.Controller.extend(Presence, {
     this.set('selectedIndex', 0);
   }.observes('term', 'typeFilter'),
 
-  searchTerm: function(term, typeFilter) {
-    var self = this;
+  searchTerm(term, typeFilter) {
+    const self = this;
 
-    var context;
-    if(this.get('searchContextEnabled')){
-      context = this.get('searchContext');
+    // for cancelling debounced search
+    if (this._cancelSearch){
+      this._cancelSearch = null;
+      return;
     }
 
-    searchForTerm(term, {
-      typeFilter: typeFilter,
-      searchContext: context
-    }).then(function(results) {
+    if (this._search) {
+      this._search.abort();
+    }
+
+    const searchContext = this.get('searchContextEnabled') ? this.get('searchContext') : null;
+
+    this._search = searchForTerm(term, {
+      typeFilter,
+      searchContext,
+      fullSearchUrl: this.get('fullSearchUrl')
+    });
+
+    this._search.then(function(results) {
       self.setProperties({ noResults: !results, content: results });
+    }).finally(function() {
       self.set('loading', false);
-    }).catch(function() {
-      self.set('loading', false);
+      self._search = null;
     });
   },
 
   showCancelFilter: function() {
     if (this.get('loading')) return false;
-    return this.present('typeFilter');
+    return !Ember.isEmpty(this.get('typeFilter'));
   }.property('typeFilter', 'loading'),
 
   termChanged: function() {
@@ -87,22 +135,36 @@ export default Em.Controller.extend(Presence, {
   }.observes('term'),
 
   actions: {
-    moreOfType: function(type) {
-      if (type === 'topic' && (!this.get('searchContextEnabled') || this.get('searchContext.type') !== 'topic')) {
-        var term = this.get('term');
-        // TODO in topic and in category special handling
-        Discourse.URL.routeTo("/search?q=" + encodeURIComponent(term));
-      } else {
-        this.set('typeFilter', type);
+    fullSearch() {
+      const self = this;
+
+      if (this._search) {
+        this._search.abort();
+      }
+
+      // maybe we are debounced and delayed
+      // stop that as well
+      this._cancelSearch = true;
+      Em.run.later(function(){
+        self._cancelSearch = false;
+      }, 400);
+
+      const url = this.get('fullSearchUrlRelative');
+      if (url) {
+        DiscourseURL.routeTo(url);
       }
     },
 
-    cancelType: function() {
+    moreOfType(type) {
+      this.set('typeFilter', type);
+    },
+
+    cancelType() {
       this.cancelTypeFilter();
     }
   },
 
-  cancelTypeFilter: function() {
+  cancelTypeFilter() {
     this.set('typeFilter', null);
   }
 });

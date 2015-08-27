@@ -8,9 +8,6 @@
 te:
   js:
     number:
-      format:
-        separator: "."
-        delimiter: ","
       human:
         storage_units:
           format: '%n %u'
@@ -22,9 +19,6 @@ te:
             kb: కేబీ
             mb: యంబీ
             tb: టీబీ
-      short:
-        thousands: "{{number}}k"
-        millions: "{{number}}M"
     dates:
       time: "h:mm a"
       long_no_year: "MMM D h:mm a"
@@ -111,7 +105,6 @@ te:
     admin_title: "అధికారి"
     flags_title: "కేతనాలు"
     show_more: "మరింత చూపు"
-    show_help: "సహాయం"
     links: "లంకెలు"
     links_lowercase:
       one: "లంకె"
@@ -412,7 +405,6 @@ te:
         every_three_days: "ప్రతి మూడు రోజులకీ"
         weekly: "ప్రతీవారం"
         every_two_weeks: "ప్రతి రెండు వారాలకీ"
-      email_always: "నేను ఈసైటుపై క్రియాశీలంగా ఉన్నా నాకు ఈమెయిల్ పంపుట ఆపవద్దు"
       other_settings: "ఇతర"
       categories_settings: "వర్గాలు"
       new_topic_duration:
@@ -683,7 +675,6 @@ te:
       remote_tip: "బొమ్మకు లంకె"
       remote_tip_with_attachments: "బొమ్మకు లేదా దస్త్రానికి లంకె ({{authorized_extensions}})"
       hint: "(మీరు వాటిని ఎడిటరులోకి లాగి వదిలెయ్యటు ద్వారా కూడా ఎగుమతించవచ్చు)"
-      hint_for_supported_browsers: "(మీరు వాటిని ఎడిటరులోకి లాగి వదిలెయ్యటు ద్వారా కూడా ఎగుమతించవచ్చు)"
       uploading: "ఎగుమతవుతోంది"
       image_link: "మీ బొమ్మ చూపే లంకె"
     search:
@@ -695,7 +686,7 @@ te:
         user: "@{{username}} యొక్క విషయాలు వెతుకు"
         category: "\"{{category}}\" వర్గంలో వెతుకు"
         topic: "ఈ విషయంలో వెతుకు"
-    site_map: "మరో విషయాల జాబితాకు లేదా వర్గానికి వెళ్లు"
+    hamburger_menu: "మరో విషయాల జాబితాకు లేదా వర్గానికి వెళ్లు"
     go_back: 'వెనక్కు మరలు'
     not_logged_in_user: 'సభ్యుని ప్రస్తుత కలాపాల మరియు అభిరూపాల సారాంశ పుట'
     current_user: 'మీ సభ్యపుటకు వెళ్లు'
@@ -825,10 +816,6 @@ te:
           title: "గమనిస్తున్నారు"
         tracking:
           title: "గమనిస్తున్నారు"
-        regular:
-          title: "రెగ్యులరు"
-        regular_pm:
-          title: "రెగ్యులరు"
         muted_pm:
           title: "నిశ్శబ్దం"
         muted:
@@ -914,7 +901,6 @@ te:
           one: మీరు <b>1</b> టపా ఎంచుకున్నారు
           other: మీరు <b>{{count}}</b> టపాలు ఎంచుకున్నారు
     post:
-      reply_topic: " {{link}} కు జవాబివ్వు"
       quote_reply: "కోట్ జవాబు"
       edit_reason: "కారణం:"
       post_number: "టపా {{number}}"
@@ -930,9 +916,6 @@ te:
       expand_collapse: "పెంచు/తుంచు"
       more_links: "{{count}} ఇంకా..."
       unread: "టపా చదవనిది"
-      has_replies:
-        one: "జవాబు"
-        other: "జవాబులు"
       errors:
         create: "క్షమించాలి. మీ టపా సృష్టించుటలో దోషం. దయచేసి మరలా ప్రయత్నించండి. "
         edit: "క్షమించాలి. మీ టపా సవరించుటలో దోషం. మరలా ప్రయత్నించండి"
@@ -1220,7 +1203,6 @@ te:
       with_topics: "%{filter} విషయాలు"
       with_category: "%{filter} %{category} విషయాలు"
       latest:
-        title: "తాజా"
         help: "ఇటీవలి టపాలతోని విషయాలు"
       hot:
         title: "వేడివేడి"
@@ -1266,9 +1248,6 @@ te:
       top:
         title: "అగ్ర"
         help: "గత సంవత్సరం, నెల, వారం లేదా రోజులోని అత్యంత క్రియాశీల విషయాలు"
-        this_year: "ఈ సంవత్సరం"
-        this_month: "ఈ నెల"
-        this_week: "ఈ వారం"
         today: "ఈ రోజు"
     browser_update: 'దురదృష్టవశాత్తు, <a href="http://www.discourse.org/faq/#browser">ఈ సైట్ లో పనిచేయడానికి మీ బ్రౌజర్ చాలా పాతది </a>. దయచేసి <a href="http://browsehappy.com">మీ బ్రౌజర్ ని నవీకరించండి</a>.'
     permission_types:
@@ -1982,7 +1961,7 @@ te:
         title: 'అనువర్తనం'
         create: '<b>c</b> కొత్త టపా సృష్టించు'
         notifications: '<b>n</b> తెరచిన ప్రకటనలు'
-        site_map_menu: '<b>=</b> సైట్ మెనూ తెరువు'
+        hamburger_menu: '<b>=</b> సైట్ మెనూ తెరువు'
         user_profile_menu: '<b>p</b> యూజర్ మెనూ తెరువు'
         show_incoming_updated_topics: '<b>.</b> నవీకరించిన విషయాలను చూపించండి'
         search: '<b>/</b> వెతుకు'
@@ -2100,12 +2079,3 @@ te:
         reader:
           name: చదువరి
           description: 100 టపాల కన్నా ఎక్కువ ఉన్న అంశంలో ప్రతి టపా చదవండి
-    google_search: |
-      <h2>గూగుల్ తో వెతుకు</h2>
-      <p>
-      <form action='//google.com/search' id='google-search' onsubmit="document.getElementById('google-query').value = 'site:' + window.location.host + ' ' + document.getElementById('user-query').value; return true;">
-      <input type="text" id='user-query' value="">
-      <input type='hidden' id='google-query' name="q">
-      <button class="btn btn-primary">గూగుల్</button>
-      </form>
-      </p>

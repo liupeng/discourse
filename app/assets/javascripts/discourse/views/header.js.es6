@@ -1,14 +1,16 @@
 let originalZIndex;
 
-export default Discourse.View.extend({
+export default Ember.View.extend({
   tagName: 'header',
   classNames: ['d-header', 'clearfix'],
   classNameBindings: ['editingTopic'],
   templateName: 'header',
   renderDropdowns: false,
 
-  showDropdown: function($target) {
+  showDropdown($target) {
     var self = this;
+
+    this.appEvents.trigger('dropdowns:closeAll');
 
     if (!this.get("renderDropdowns")) {
       this.set("renderDropdowns", true);
@@ -55,11 +57,11 @@ export default Discourse.View.extend({
       $li.removeClass('active');
       $html.data('hide-dropdown', null);
 
-      const controller = self.get('controller');
       if (controller && !controller.isDestroyed){
         controller.set('visibleDropdown', null);
       }
       $html.off('click.d-dropdown');
+      $dropdown.off('click.d-dropdown');
     };
 
     // if a dropdown is active and the user clicks on it, close it
@@ -75,7 +77,12 @@ export default Discourse.View.extend({
     $dropdown.find('input[type=text]').focus().select();
 
     $html.on('click.d-dropdown', function(e) {
-      return $(e.target).closest('.d-dropdown').length > 0 ? true : hideDropdown.apply(self);
+      return $(e.target).closest('.d-dropdown').length > 0 ? true : hideDropdown();
+    });
+
+    $dropdown.on('click.d-dropdown', function(e) {
+      if(e.shiftKey || e.metaKey || e.ctrlKey || e.which === 2) return true;
+      return $(e.target).closest('a').not('.search-link, .filter-type').length > 0 ? hideDropdown() : true;
     });
 
     $html.data('hide-dropdown', hideDropdown);
@@ -133,7 +140,7 @@ export default Discourse.View.extend({
     const self = this;
 
     this.$('a[data-dropdown]').on('click.dropdown', function(e) {
-      self.showDropdown.apply(self, [$(e.currentTarget)]);
+      self.showDropdown.call(self, $(e.currentTarget));
       return false;
     });
     this.$().on('click.notifications','a.unread-private-messages, a.unread-notifications, a[data-notifications]', function(e) {

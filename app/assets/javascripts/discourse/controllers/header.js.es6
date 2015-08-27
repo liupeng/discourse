@@ -1,10 +1,9 @@
-import DiscourseController from 'discourse/controllers/controller';
-
-const HeaderController = DiscourseController.extend({
+const HeaderController = Ember.Controller.extend({
   topic: null,
   showExtraInfo: null,
   notifications: null,
   loadingNotifications: false,
+  hamburgerVisible: false,
   needs: ['application'],
 
   loginRequired: Em.computed.alias('controllers.application.loginRequired'),
@@ -70,6 +69,10 @@ const HeaderController = DiscourseController.extend({
         self.refreshNotifications();
       }
       headerView.showDropdownBySelector("#user-notifications");
+    },
+
+    toggleHamburgerMenu() {
+      this.toggleProperty('hamburgerVisible');
     }
   }
 });

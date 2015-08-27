@@ -15,10 +15,12 @@ export const Button = function(action, label, icon, opts) {
 };
 
 function animateHeart($elem, start, end, complete) {
+  if (Ember.testing) { return Ember.run(this, complete); }
+
   $elem.stop()
        .css('textIndent', start)
        .animate({ textIndent: end }, {
-          complete: complete,
+          complete,
           step(now) {
             $(this).css('transform','scale('+now+')');
           },
@@ -54,8 +56,8 @@ const PostMenuComponent = Ember.Component.extend(StringBuffer, {
 
   rerenderTriggers: [
     'post.deleted_at',
-    'likeAction.count',
-    'likeAction.users.length',
+    'post.likeAction.count',
+    'post.likeAction.users.length',
     'post.reply_count',
     'post.showRepliesBelow',
     'post.can_delete',
@@ -66,10 +68,6 @@ const PostMenuComponent = Ember.Component.extend(StringBuffer, {
     'post.wiki',
     'post.post_type',
     'collapsed'],
-
-  likeAction: function() {
-    return this.get('post.actionByName.like');
-  }.property('post.actionByName.like'),
 
   _collapsedByDefault: function() {
     this.set('collapsed', true);
@@ -87,11 +85,13 @@ const PostMenuComponent = Ember.Component.extend(StringBuffer, {
 
   // Delegate click actions
   click(e) {
-    const $target = $(e.target),
-        action = $target.data('action') || $target.parent().data('action');
+    const $target = $(e.target);
+    const action = $target.data('action') || $target.parent().data('action');
+
+    if ($target.prop('disabled') || $target.parent().prop('disabled')) { return; }
 
     if (!action) return;
-    const handler = this["click" + action.replace(/[\+-]/, "").capitalize()];
+    const handler = this["click" + action.classify()];
     if (!handler) return;
 
     handler.call(this, this.get('post'));
@@ -103,24 +103,11 @@ const PostMenuComponent = Ember.Component.extend(StringBuffer, {
 
     const replyCount = post.get('reply_count');
     buffer.push("<button class='show-replies highlight-action' data-action='replies'>");
-    buffer.push(I18n.t("post.has_replies", { count: replyCount }));
+    buffer.push(I18n.t("post.has_replies", { count: replyCount || 0 }));
 
     const icon = (this.get('post.replies.length') > 0) ? 'chevron-up' : 'chevron-down';
     return buffer.push(iconHTML(icon) + "</button>");
   },
-
-  renderLikes(post, buffer) {
-    const likeCount = this.get('likeAction.count') || 0;
-    if (likeCount === 0) { return; }
-
-    buffer.push("<button class='show-likes' data-action='likes'>");
-    buffer.push("<span class='badge-posts'>" + Discourse.Formatter.number(likeCount) + "</span>");
-    buffer.push(I18n.t("post.has_likes", { count: likeCount }));
-
-    const icon = (this.get('likeAction.users.length') > 0) ? 'chevron-up' : 'chevron-down';
-    return buffer.push(iconHTML(icon) + "</button>");
-  },
-
 
   renderButtons(post, buffer) {
     const self = this;
@@ -141,7 +128,7 @@ const PostMenuComponent = Ember.Component.extend(StringBuffer, {
 
     const yours = post.get('yours');
     this.siteSettings.post_menu.split("|").forEach(function(i) {
-      const creator = self["buttonFor" + i.replace(/[\+-]/, '').capitalize()];
+      const creator = self["buttonFor" + i.classify()];
       if (creator) {
         const button = creator.call(self, post);
         if (button) {
@@ -177,8 +164,8 @@ const PostMenuComponent = Ember.Component.extend(StringBuffer, {
     buffer.push("</div>");
   },
 
-  clickLikecount() {
-    const likeAction = this.get('post.actionByName.like');
+  clickLikeCount() {
+    const likeAction = this.get('post.likeAction');
     if (likeAction) {
       const users = likeAction.get('users');
       if (users && users.length) {
@@ -244,11 +231,11 @@ const PostMenuComponent = Ember.Component.extend(StringBuffer, {
 
   // Like button
   buttonForLike() {
-    const likeAction = this.get('likeAction');
+    const likeAction = this.get('post.likeAction');
     if (!likeAction) { return; }
 
     const className = likeAction.get('acted') ? 'has-like fade-out' : 'like';
-    var opts = {className: className};
+    const opts = {className: className};
 
     if (likeAction.get('canToggle')) {
       const descKey = likeAction.get('acted') ? 'post.controls.undo_like' : 'post.controls.like';
@@ -259,17 +246,17 @@ const PostMenuComponent = Ember.Component.extend(StringBuffer, {
     }
   },
 
-  buttonForLikecount() {
-    var likeCount = this.get('post.like_count') || 0;
+  buttonForLikeCount() {
+    const likeCount = this.get('post.likeAction.count') || 0;
     if (likeCount > 0) {
-      const likedPost = !!this.get('likeAction.acted');
+      const likedPost = !!this.get('post.likeAction.acted');
 
       const label = likedPost ? 'post.has_likes_title_you' : 'post.has_likes_title';
 
       return new Button('like-count', label, undefined, {
-          className: 'like-count highlight-action',
-          innerHTML: I18n.t("post.has_likes", { count:  likeCount }),
-          labelOptions: {count: likedPost ? (likeCount-1) : likeCount}
+        className: 'like-count highlight-action',
+        innerHTML: I18n.t("post.has_likes", { count:  likeCount }),
+        labelOptions: {count: likedPost ? (likeCount-1) : likeCount}
       });
     }
   },
@@ -277,7 +264,7 @@ const PostMenuComponent = Ember.Component.extend(StringBuffer, {
   clickLike(post) {
     const $heart = this.$('.fa-heart'),
           $likeButton = this.$('button[data-action=like]'),
-          acted = post.get('actionByName.like.acted'),
+          acted = post.get('likeAction.acted'),
           self = this;
 
     if (acted) {

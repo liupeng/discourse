@@ -172,14 +172,6 @@ sv:
       - Konstruktiv kritik välkomnas, men kritisera då *idéer* och inte personer.
 
       För mer, [läs våra riktlinjer](/guidelines). Detta meddelande syns enbart vid dina första %{education_posts_text}.
-    avatar: |
-      ### Vad sägs om en ny bild för ditt konto?
-
-      Du har skapat några ämnen och postat några svar, men din profilbild är inte lika unik som dig - det är samma standardbild som alla nya användare får.
-
-      Har du inte funderat på att **[besöka din användarprofil](%{profile_path})** och ladda upp ett eget foto som representerar dig?
-
-      Det är lättare att följa diskussioner och hitta intressanta personer i konversationer när alla har en unik profilbild!
     sequential_replies: |
       ### Överväg att svara på flera inlägg på en och samma gång
 
@@ -543,6 +535,10 @@ sv:
       title: "Total"
       xaxis: "Dag"
       yaxis: "Totala API-anrop"
+    page_view_logged_in_mobile_reqs:
+      xaxis: "Dag"
+    page_view_anon_mobile_reqs:
+      xaxis: "Dag"
     http_background_reqs:
       title: "Bakgrund"
       xaxis: "Dag"
@@ -619,7 +615,6 @@ sv:
     min_first_post_length: "Minst antal tillåtna tecken i första inlägget (ämnestext)"
     min_private_message_post_length: "Minst antal tillåtna tecken i inlägg för meddelanden"
     min_search_term_length: "Minsta giltiga teckenlängd på sökterm"
-    allow_uncategorized_topics: "Tillåt att ämnen kan skapas utan en kategori."
     uncategorized_description: "Beskrivningen av den okategoriserade kategorin. Lämna tomt för ingen beskrivning."
     allow_duplicate_topic_titles: "Tillåt ämnen med identiska rubriker."
     unique_posts_mins: "Hur många minuter innan en användare kan göra ett inlägg med precis samma innehåll igen"
@@ -661,7 +656,6 @@ sv:
     enable_github_logins: "Enable Github authentication, requires github_client_id and github_client_secret"
     github_client_id: "Client id for Github authentication, registered at https://github.com/settings/applications"
     github_client_secret: "Client secret for Github authentication, registered at https://github.com/settings/applications"
-    backup_daily: "Automatiskt skapa en säkerhetskopia av webbplatsen en gång per dag."
     active_user_rate_limit_secs: "How frequently we update the 'last_seen_at' field, in seconds"
     previous_visit_timeout_hours: "How long a visit lasts before we consider it the 'previous' visit, in hours"
     rate_limit_create_topic: "Efter att ha skapat ett ämne, måste användare vänta (n) sekunder innan de kan skapa ett nytt."
@@ -725,7 +719,7 @@ sv:
     disable_emails: "Förhindra Discourse från att skicka någon form av e-post"
     pop3_polling_ssl: "Använd SSL vid anslutning till POP3-servern. (Rekommenderat)"
     email_editable: "Tillåt användare att ändra deras e-postadress efter registrering."
-    default_digest_email_frequency: "Hur ofta användare får emailutskick som standard. De kan ändra detta val under sina inställningar."
+    default_email_digest_frequency: "Hur ofta användare får emailutskick som standard. De kan ändra detta val under sina inställningar."
     enable_user_directory: "Tillhandahåll en bläddringsbar användarkatalog"
     allow_anonymous_posting: "Tillåt användare att växla till anonymt läge"
     anonymous_posting_min_trust_level: "Lägsta förtroendenivå som krävs för att aktivera anonyma inlägg"
@@ -772,10 +766,6 @@ sv:
   most_posts: "Mest inlägg"
   most_recent_poster: "Senaste skribent"
   frequent_poster: "Flitig skribent"
-  move_posts:
-    existing_topic_moderator_post:
-      one: "Jag flyttade ett inlägg till ett existerande ämne: %{topic_link}"
-      other: "Jag flyttade %{count} inlägg till ett existerande ämne: %{topic_link}"
   topic_statuses:
     archived_enabled: "Detta ämne är nu arkiverat. Det är fryst och kan inte förändras på något sätt."
     archived_disabled: "Detta ämne är nu oarkiverat. Det är inte längre fruset, och kan ändras."
@@ -868,13 +858,6 @@ sv:
       Denna inbjudan kommer från en betrodd användare, så du behöver inte logga in.
   invite_password_instructions:
     subject_template: "Ange lösenord för ditt konto på %{site_name}"
-    text_body_template: |
-      Tack för att du accepterade inbjudan till %{site_name} -- välkommen!
-
-      Klicka på länken för att ange ett lösenord nu:
-      %{base_url}/users/password-reset/%{email_token}
-
-      Om du inte kommer ihåg ditt lösenord, eller inte skaffat något ännu, välj "jag har glömt mitt lösenord" när du loggar in med din e-postadress.
   test_mailer:
     subject_template: "[%{site_name}] Email Deliverability Test"
   new_version_mailer:
@@ -971,7 +954,6 @@ sv:
         [prefs]: %{user_preferences_url}
     backup_succeeded:
       subject_template: "Säkerhetskopia skapades utan problem"
-      text_body_template: "Säkerhetskopieringen lyckades.\nBesök [admin > Säkerhetskopior](/admin/backups) för att ladda ned din nya säkerhetskopia."
     backup_failed:
       subject_template: "Säkerhetskopiering misslyckades"
     restore_succeeded:
@@ -995,7 +977,6 @@ sv:
       subject_template:
         one: "1 användare väntar på godkännande"
         other: "%{count} användare väntar på godkännande"
-  unsubscribe_link: "To unsubscribe from these emails, visit your [user preferences](%{user_preferences_url})."
   subject_re: "Sv:"
   user_notifications:
     previous_discussion: "Föregående Svar"
@@ -1077,7 +1058,6 @@ sv:
     signup_after_approval:
       subject_template: "Du har blivit godkänd på %{site_name}!"
     signup:
-      subject_template: "[%{site_name}] Activate your new account"
       text_body_template: "Välkommen till %{site_name}!\n\nKlicka på följande länk för att bekräfta och aktivera ditt nya konto:\n%{base_url}/users/activate-account/%{email_token}\n\nOm länken ovan inte går att klicka på kan du kopiera och klistra in länken i adressfältet i din webbläsare. \n"
   page_not_found:
     title: "Sidan du sökte existerar inte eller är privat."
@@ -1100,7 +1080,6 @@ sv:
       too_large: "Tyvärr, filen du försöker ladda upp är för stor (maxstorlek är %{max_size_kb}kb)."
     images:
       too_large: "Tyvärr, bilden du försöker ladda upp är för stor (maxstorlek är %{max_size_kb}kb). Ändra storleken och försök igen."
-      unknown_image_type: "Tyvärr, men filen du försökte ladda upp ser inte ut att vara en bild."
       size_not_found: "Vi beklagar, men vi kunde inte avgöra bildens storlek. Kanske är din bildfil skadad?"
   email_log:
     no_user: "Kan inte hitta användare med id %{user_id}"
@@ -1121,81 +1100,6 @@ sv:
     title: "FAQ/Riktlinjer"
   tos_topic:
     title: "Villkor"
-  badges:
-    long_descriptions:
-      autobiographer: |
-        Bla bla bla
-        Bla bla bla
-      first_like: |
-        Bla bla bla
-        Bla bla bla
-      first_link: |
-        Bla bla bla
-        Bla bla bla
-      first_quote: |+
-        Bla bla bla
-        Bla bla bla
-
-      first_share: |+
-        Bla bla bla
-        Bla bla bla
-
-      read_guidelines: |
-        Bla bla bla
-        Bla bla bla
-      reader: |
-        Bla bla bla
-        Bla bla bla
-      editor: |
-        Bla bla bla
-        Bla bla bla
-      nice_share: |
-        Bla bla bla
-        Bla bla bla
-      welcome: |
-        Bla bla bla
-        Bla bla bla
-      anniversary: |+
-        Bla bla bla
-        Bla bla bla
-
-      good_share: |
-        Bla bla bla
-        Bla bla bla
-      great_share: |
-        Bla bla bla
-        Bla bla bla
-      nice_post: |
-        Bla bla bla
-        Bla bla bla
-      nice_topic: |
-        Bla bla bla
-        Bla bla bla
-      good_post: |
-        Bla bla bla
-        Bla bla bla
-      good_topic: |
-        Bla bla bla
-        Bla bla bla
-      great_post: |
-        Bla bla bla
-        Bla bla bla
-      great_topic: |
-        Bla bla bla
-        Bla bla bla
-      basic: |
-        Bla bla bla
-        Bla bla bla
-      member: |
-        Bla bla bla
-        Bla bla bla
-      regular: |
-        Bla bla bla
-        Bla bla bla
-      leader: |+
-        Bla bla bla
-        Bla bla bla
-
   admin_login:
     success: "E-post skickat"
     error: "Fel!"

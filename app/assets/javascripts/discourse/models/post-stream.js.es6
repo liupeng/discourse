@@ -1,3 +1,4 @@
+import DiscourseURL from 'discourse/lib/url';
 import RestModel from 'discourse/models/rest';
 
 function calcDayDiff(p1, p2) {
@@ -159,7 +160,7 @@ const PostStream = RestModel.extend({
     const posts = this.get('posts');
     if (posts.length > 1) {
       const secondPostNum = posts[1].get('post_number');
-      Discourse.URL.jumpToPost(secondPostNum);
+      DiscourseURL.jumpToPost(secondPostNum);
     }
   },
 
@@ -233,12 +234,12 @@ const PostStream = RestModel.extend({
     this.set('gaps', this.get('gaps') || {before: {}, after: {}});
     const before = this.get('gaps.before');
 
-    const post = posts.find(function(post){
-      return post.get('post_number') > to;
+    const post = posts.find(function(p){
+      return p.get('post_number') > to;
     });
 
-    before[post.get('id')] = remove.map(function(post){
-      return post.get('id');
+    before[post.get('id')] = remove.map(function(p){
+      return p.get('id');
     });
     post.set('hasGap', true);
 
@@ -490,8 +491,8 @@ const PostStream = RestModel.extend({
 
         // we need to zip this into the stream
         let index = 0;
-        stream.forEach(function(postId){
-          if(postId < p.id){
+        stream.forEach(function(pid){
+          if (pid < p.id){
             index+= 1;
           }
         });
@@ -767,14 +768,12 @@ const PostStream = RestModel.extend({
 
     // If the result was 404 the post is not found
     if (status === 404) {
-      topic.set('errorTitle', I18n.t('topic.not_found.title'));
       topic.set('notFoundHtml', result.jqXHR.responseText);
       return;
     }
 
     // If the result is 403 it means invalid access
     if (status === 403) {
-      topic.set('errorTitle', I18n.t('topic.invalid_access.title'));
       topic.set('noRetry', true);
       if (Discourse.User.current()) {
         topic.set('message', I18n.t('topic.invalid_access.description'));
@@ -785,7 +784,6 @@ const PostStream = RestModel.extend({
     }
 
     // Otherwise supply a generic error message
-    topic.set('errorTitle', I18n.t('topic.server_error.title'));
     topic.set('message', I18n.t('topic.server_error.description'));
   }
 

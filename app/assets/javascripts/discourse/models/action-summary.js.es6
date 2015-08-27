@@ -48,6 +48,7 @@ export default RestModel.extend({
 
   // Perform this action
   act: function(post, opts) {
+
     if (!opts) opts = {};
 
     const action = this.get('actionType.name_key');
@@ -60,7 +61,7 @@ export default RestModel.extend({
       can_undo: true
     });
 
-    if(action === 'notify_moderators' || action === 'notify_user') {
+    if (action === 'notify_moderators' || action === 'notify_user') {
       this.set('can_undo',false);
       this.set('can_defer_flags',false);
     }
@@ -88,13 +89,13 @@ export default RestModel.extend({
       }
     }).catch(function(error) {
       popupAjaxError(error);
-      self.removeAction();
+      self.removeAction(post);
     });
   },
 
   // Undo this action
   undo: function(post) {
-    this.removeAction();
+    this.removeAction(post);
 
     // Remove our post action
     return Discourse.ajax("/post_actions/" + post.get('id'), {

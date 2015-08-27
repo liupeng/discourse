@@ -106,7 +106,6 @@ class Topic < ActiveRecord::Base
   has_one :first_post, -> {where post_number: 1}, class_name: Post
 
   # When we want to temporarily attach some data to a forum topic (usually before serialization)
-  attr_accessor :search_data
   attr_accessor :user_data
 
   attr_accessor :posters  # TODO: can replace with posters_summary once we remove old list code
@@ -407,8 +406,8 @@ class Topic < ActiveRecord::Base
     similar
   end
 
-  def update_status(status, enabled, user, message=nil)
-    TopicStatusUpdate.new(self, user).update!(status, enabled, message)
+  def update_status(status, enabled, user, opts={})
+    TopicStatusUpdate.new(self, user).update!(status, enabled, opts)
   end
 
   # Atomically creates the next post number
@@ -483,22 +482,25 @@ class Topic < ActiveRecord::Base
       Category.where(id: new_category.id).update_all("topic_count = topic_count + 1")
       CategoryFeaturedTopic.feature_topics_for(old_category) unless @import_mode
       CategoryFeaturedTopic.feature_topics_for(new_category) unless @import_mode || old_category.id == new_category.id
-      CategoryUser.auto_watch_new_topic(self)
-      CategoryUser.auto_track_new_topic(self)
+      CategoryUser.auto_watch_new_topic(self, new_category)
+      CategoryUser.auto_track_new_topic(self, new_category)
     end
 
     true
   end
 
-  def add_moderator_post(user, text, opts={})
+  def add_moderator_post(user, text, opts=nil)
+    opts ||= {}
     new_post = nil
     Topic.transaction do
       creator = PostCreator.new(user,
                                 raw: text,
-                                post_type: Post.types[:moderator_action],
+                                post_type: opts[:post_type] || Post.types[:moderator_action],
+                                action_code: opts[:action_code],
                                 no_bump: opts[:bump].blank?,
                                 skip_notifications: opts[:skip_notifications],
-                                topic_id: self.id)
+                                topic_id: self.id,
+                                skip_validations: true)
       new_post = creator.create
       increment!(:moderator_posts_count)
     end
@@ -714,6 +716,10 @@ class Topic < ActiveRecord::Base
     url
   end
 
+  def unsubscribe_url
+    "#{url}/unsubscribe"
+  end
+
   def clear_pin_for(user)
     return unless user.present?
     TopicUser.change(user.id, id, cleared_pinned_at: Time.now)
@@ -724,9 +730,17 @@ class Topic < ActiveRecord::Base
     TopicUser.change(user.id, id, cleared_pinned_at: nil)
   end
 
-  def update_pinned(status, global=false)
-    update_column(:pinned_at, status ? Time.now : nil)
-    update_column(:pinned_globally, global)
+  def update_pinned(status, global=false, pinned_until=nil)
+    pinned_until = Time.parse(pinned_until) rescue nil
+
+    update_columns(
+      pinned_at: status ? Time.now : nil,
+      pinned_globally: global,
+      pinned_until: pinned_until
+    )
+
+    Jobs.cancel_scheduled_job(:unpin_topic, topic_id: self.id)
+    Jobs.enqueue_at(pinned_until, :unpin_topic, topic_id: self.id) if pinned_until
   end
 
   def draft_key
@@ -741,6 +755,11 @@ class Topic < ActiveRecord::Base
     if user && user.id
       notifier.muted?(user.id)
     end
+  end
+
+  def self.ensure_consistency!
+    # unpin topics that might have been missed
+    Topic.where("pinned_until < now()").update_all(pinned_at: nil, pinned_globally: false, pinned_until: nil)
   end
 
   def self.auto_close
@@ -847,7 +866,7 @@ class Topic < ActiveRecord::Base
   end
 
   def expandable_first_post?
-    SiteSetting.embeddable_hosts.present? && SiteSetting.embed_truncate? && has_topic_embed?
+    SiteSetting.embed_truncate? && has_topic_embed?
   end
 
   TIME_TO_FIRST_RESPONSE_SQL ||= <<-SQL

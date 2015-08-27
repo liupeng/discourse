@@ -99,6 +99,7 @@ class OptimizedImage < ActiveRecord::Base
   def self.resize_instructions(from, to, dimensions, opts={})
     # NOTE: ORDER is important!
     %W{
+      convert
       #{from}[0]
       -gravity center
       -background transparent
@@ -113,17 +114,18 @@ class OptimizedImage < ActiveRecord::Base
 
   def self.resize_instructions_animated(from, to, dimensions, opts={})
     %W{
+      gifsicle
       #{from}
-      -coalesce
-      -gravity center
-      -thumbnail #{dimensions}^
-      -extent #{dimensions}
-      #{to}
+      --colors=256
+      --resize-fit #{dimensions}
+      --optimize=3
+      --output #{to}
     }
   end
 
   def self.downsize_instructions(from, to, dimensions, opts={})
     %W{
+      convert
       #{from}[0]
       -gravity center
       -background transparent
@@ -133,38 +135,30 @@ class OptimizedImage < ActiveRecord::Base
   end
 
   def self.downsize_instructions_animated(from, to, dimensions, opts={})
-    %W{
-      #{from}
-      -coalesce
-      -gravity center
-      -background transparent
-      -resize #{dimensions}#{!!opts[:force_aspect_ratio] ? "\\!" : "\\>"}
-      #{to}
-    }
+    resize_instructions_animated(from, to, dimensions, opts)
   end
 
   def self.resize(from, to, width, height, opts={})
-    optimize("resize", from, to, width, height, opts)
+    optimize("resize", from, to, "#{width}x#{height}", opts)
   end
 
   def self.downsize(from, to, max_width, max_height, opts={})
-    optimize("downsize", from, to, max_width, max_height, opts)
+    optimize("downsize", from, to, "#{max_width}x#{max_height}", opts)
   end
 
-  def self.optimize(operation, from, to, width, height, opts={})
-    dim = dimensions(width, height)
+  def self.downsize(from, to, dimensions, opts={})
+    optimize("downsize", from, to, dimensions, opts)
+  end
+
+  def self.optimize(operation, from, to, dimensions, opts={})
     method_name = "#{operation}_instructions"
     method_name += "_animated" if !!opts[:allow_animation] && from =~ /\.GIF$/i
-    instructions = self.send(method_name.to_sym, from, to, dim, opts)
+    instructions = self.send(method_name.to_sym, from, to, dimensions, opts)
     convert_with(instructions, to)
   end
 
-  def self.dimensions(width, height)
-    "#{width}x#{height}"
-  end
-
   def self.convert_with(instructions, to)
-    `convert #{instructions.join(" ")} &> /dev/null`
+    `#{instructions.join(" ")} &> /dev/null`
     return false if $?.exitstatus != 0
 
     ImageOptim.new.optimize_image!(to)

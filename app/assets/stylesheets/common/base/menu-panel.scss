@@ -1,0 +1,85 @@
+.menu-panel.slide-in {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100%;
+  .panel-body {
+    position: absolute;
+    top: 40px;
+    bottom: 37px;
+  }
+}
+
+.menu-panel.drop-down {
+  position: absolute;
+}
+
+.menu-panel {
+  border: 1px solid dark-light-diff($primary, $secondary, 90%, -60%);
+  box-shadow: 0 2px 2px rgba(0,0,0, .25);
+  background-color: $secondary;
+  z-index: 1100;
+  overflow: none;
+  padding: 0.5em 0.5em 0.5em 0.5em;
+  width: 300px;
+
+  .close-panel {
+    float: right;
+    color: dark-light-choose(scale-color($header_primary, $lightness: 50%), $header_primary);
+    font-size: 1.5em;
+    margin-right: -10px;
+    margin-top: 0.1em;
+    padding: 0 4 4 4px;
+    z-index: 9999;
+  }
+
+  .panel-header {
+    position: absolute;
+    right: 20px;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .panel-body {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+.hamburger-panel {
+  ul.location-links li, li.heading {
+    a {
+      padding: 0.5em;
+      display: block;
+      &:hover {
+        background-color: dark-light-diff($highlight, $secondary, 50%, -55%);
+      }
+    }
+  }
+
+  li.category-link {
+    float: left;
+    background-color: transparent;
+    width: 45%;
+    margin: 5px 5px 0 8px;
+    .box {margin-top: 0;}
+    .badge-notification {
+      color: dark-light-choose(scale-color($primary, $lightness: 50%), scale-color($secondary, $lightness: 50%));
+      background-color: transparent;
+      vertical-align: top;
+      padding: 5px 5px 2px 5px;
+    }
+  }
+
+  // note these topic counts only appear for anons in the category hamburger drop down
+  b.topics-count {
+    color: dark-light-choose(scale-color($primary, $lightness: 50%), scale-color($secondary, $lightness: 50%));
+    font-weight: normal;
+    font-size: 11px;
+  }
+}
+
