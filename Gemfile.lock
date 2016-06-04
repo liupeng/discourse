@@ -1,5 +1,5 @@
 GEM
-  remote: https://rubygems.org/
+  remote: https://ruby.taobao.org/
   specs:
     actionmailer (4.2.6)
       actionpack (= 4.2.6)
@@ -500,4 +500,4 @@ DEPENDENCIES
   unicorn
 
 BUNDLED WITH
-   1.12.3
+   1.12.5
