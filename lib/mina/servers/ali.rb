@@ -1,6 +1,6 @@
 namespace :server do
   task :ali => [:environment] do
-    set :branch,              'master'
+    set :branch,              'develop'
     set :domain,              '123.57.4.203'
     set :port,                '22'
     set :deploy_to,           '/home/app/server/discourse'
