@@ -13,18 +13,18 @@ respawn limit 3 30
 start on runlevel [2345]
 stop on runlevel [06]
 
-env RAILS_ROOT=/var/www/discourse
+env RAILS_ROOT=/home/app/server/discourse
 env RAILS_ENV=production
 env NUM_WEBS=4
-env HOME=/home/discourse
-env USER=discourse
-env GROUP=discourse
+env HOME=/home/app
+env USER=app
+env GROUP=app
 
 script
 # runs in sh, move it to bash so we can source rvm
 exec /bin/bash <<EOT
-  source /home/discourse/.rvm/scripts/rvm
-  cd /var/www/discourse
-  exec /home/discourse/.rvm/bin/bootup_bluepill --no-privileged load /var/www/discourse/config/discourse.pill
+  source /home/app/.rvm/scripts/rvm
+  cd /home/app/server/discourse
+  exec /home/app/.rvm/bin/bootup_bluepill --no-privileged load /home/app/server/discourse/current/config/discourse.pill
 EOT
 end script
