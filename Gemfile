@@ -95,6 +95,7 @@ gem 'pry-rails', require: false
 gem 'r2', '~> 0.2.5', require: false
 gem 'rake'
 
+gem 'puma'
 
 gem 'rest-client'
 gem 'rinku'
@@ -153,6 +154,9 @@ group :development do
   gem 'librarian', '>= 0.0.25', require: false
   gem 'annotate'
   gem 'foreman', require: false
+  gem 'mina', '~> 0.3.4'
+  gem 'mina-puma', :require => false
+  gem 'mina-sidekiq'
 end
 
 # this is an optional gem, it provides a high performance replacement
